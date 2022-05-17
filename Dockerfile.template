@@ -19,4 +19,4 @@ COPY start.sh start.sh
 COPY hostname_update.sh hostname_update.sh
 
 #dev-cmd-live=sleep infinity
-CMD [ "/bin/sh", "/usr/src/start.sh" ]
+CMD [ "/usr/src/start.sh" ]
