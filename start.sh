@@ -41,7 +41,7 @@ curl -sL -X PATCH --header "Content-Type:application/json" \
     "$BALENA_SUPERVISOR_ADDRESS/v1/device/host-config?apikey=$BALENA_SUPERVISOR_API_KEY"
 echo -e "\nHostname updated!"
 
-if [[ -z $1 ]]; then
+if [ $# -eq 0 ]; then
     while inotifywait -e close_write /service/hostname/update; do ./hostname_update.sh; done
 fi
 
