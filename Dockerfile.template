@@ -16,7 +16,7 @@ WORKDIR /usr/src
 
 COPY --from=build /rootfs/ /
 COPY start.sh start.sh
-COPY hostname.sh_update hostname_update.sh
+COPY hostname_update.sh hostname_update.sh
 
 #dev-cmd-live=sleep infinity
 CMD [ "/bin/sh", "/usr/src/start.sh" ]
