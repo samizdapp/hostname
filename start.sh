@@ -14,6 +14,15 @@ fi
 CURRENT_HOSTNAME=$(curl -sL "$BALENA_SUPERVISOR_ADDRESS/v1/device/host-config?apikey=$BALENA_SUPERVISOR_API_KEY" | jq -r '.network.hostname')
 echo "Current hostname: $CURRENT_HOSTNAME"
 
+
+if [ $# -eq 0 ]; then
+  if test -f "/service/hostname/current"; then
+      echo "found hostname file"
+      SET_HOSTNAME=$(cat /service/hostname/current | tr -d '\n')
+  fi
+fi
+
+
 # Use device short uuid if hostname is set to "UUID" or "uuid"
 if [[ "${SET_HOSTNAME}" == "uuid" || "${SET_HOSTNAME}" == "UUID" ]]; then
   SET_HOSTNAME="${BALENA_DEVICE_UUID:0:7}"
@@ -31,15 +40,19 @@ echo "Target hostname: $SET_HOSTNAME"
 # Skip if target hostname already applied
 if [[ "$CURRENT_HOSTNAME" == "$SET_HOSTNAME" ]]; then
   echo "Skipping hostname set: target matches current hostname."
-  exit 0
+else
+    # Set target hostname
+    echo "Setting target hostname..."
+    curl -sL -X PATCH --header "Content-Type:application/json" \
+        --data '{"network": {"hostname": "'$SET_HOSTNAME'"}}' \
+        "$BALENA_SUPERVISOR_ADDRESS/v1/device/host-config?apikey=$BALENA_SUPERVISOR_API_KEY"
+    echo -e "\nHostname updated!"
+    echo "$SET_HOSTNAME" > /service/hostname/current
+    curl -X POST --header "Content-Type:application/json" \
+    "$BALENA_SUPERVISOR_ADDRESS/v1/reboot?apikey=$BALENA_SUPERVISOR_API_KEY"
+
 fi
 
-# Set target hostname
-echo "Setting target hostname..."
-curl -sL -X PATCH --header "Content-Type:application/json" \
-    --data '{"network": {"hostname": "'$SET_HOSTNAME'"}}' \
-    "$BALENA_SUPERVISOR_ADDRESS/v1/device/host-config?apikey=$BALENA_SUPERVISOR_API_KEY"
-echo -e "\nHostname updated!"
 
 if [ $# -eq 0 ]; then
     while inotifywait -e close_write /service/hostname/update; do ./hostname_update.sh; done

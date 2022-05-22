@@ -11,12 +11,13 @@ RUN pip install git+https://github.com/larsks/dockerize
 WORKDIR /rootfs
 RUN dockerize -n --verbose -o /rootfs/ /usr/bin/jq /usr/bin/curl
 
-FROM busybox:1.35.0
+FROM balenalib/$BALENA_ARCH-alpine
 WORKDIR /usr/src
 
 COPY --from=build /rootfs/ /
 COPY start.sh start.sh
 COPY hostname_update.sh hostname_update.sh
 
-#dev-cmd-live=sleep infinity
+RUN install_packages inotify-tools
+
 CMD [ "/usr/src/start.sh" ]

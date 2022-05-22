@@ -1,1 +1,11 @@
 FROM alpine
+WORKDIR /usr/src
+
+COPY start.local.sh start.sh
+COPY hostname_update.local.sh hostname_update.sh
+
+RUN apk add inotify-tools
+
+RUN mkdir -p /service/hostname
+
+CMD [ "/usr/src/start.sh" ]
