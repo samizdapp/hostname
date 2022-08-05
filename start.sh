@@ -53,6 +53,9 @@ else
 
 fi
 
+if [ ! -f /service/hostname/update ]; then
+  touch /service/hostname/update
+fi
 
 if [ $# -eq 0 ]; then
     while inotifywait -e close_write /service/hostname/update; do ./hostname_update.sh; done
